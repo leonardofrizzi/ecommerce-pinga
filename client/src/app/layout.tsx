@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Navbar />
 
         {/* Conteúdo do site limitado a 1280px */}
-        <main className="max-w-screen-xl mx-auto px-6">
+        <main className="max-w-screen-xl mx-auto md:px-6">
           {children}
         </main>
       </body>
