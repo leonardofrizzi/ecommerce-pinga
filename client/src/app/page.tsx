@@ -2,9 +2,10 @@
 "use client";
 
 import BannerSlider from "@/components/BannerSlider";
-// import ProductsSection from "@/components/ProductsSection";
-// import AboutSection from "@/components/AboutSection";
-// import ContactSection from "@/components/ContactSection";
+import ProductsSection from "@/components/ProductsSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import AboutSection from "@/components/AboutSection";
+import ContactSection from "@/components/ContactSection";
 
 export default function Home() {
   return (
@@ -12,10 +13,10 @@ export default function Home() {
       <BannerSlider />
 
       <main className="space-y-16 py-8 px-6">
-        {/* Aqui entram suas seções, ex: */}
-        {/* <ProductsSection /> */}
-        {/* <AboutSection /> */}
-        {/* <ContactSection /> */}
+        <ProductsSection />
+        <FeaturesSection />
+        <AboutSection />
+        <ContactSection />
       </main>
     </>
   );
