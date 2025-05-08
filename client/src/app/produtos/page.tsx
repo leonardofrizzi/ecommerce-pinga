@@ -4,30 +4,42 @@
 import { useState, useEffect, useMemo } from "react";
 import ProductCard, { Product } from "@/components/ProductCard";
 
-const allProducts: Product[] = [
-  { id: "1", name: "Cachaça Ouro 500ml", price: 79.9, image: "/products/c1.webp" },
-  { id: "2", name: "Cachaça Prata 700ml", price: 89.9, image: "/products/c2.webp" },
-  { id: "3", name: "Kit Degustação 3x200ml", price: 49.9, image: "/products/c3.webp" },
-  { id: "4", name: "Cachaça Premium 1L", price: 129.9, image: "/products/c4.webp" },
-  { id: "5", name: "Cachaça Artesanal 750ml", price: 99.9, image: "/products/c5.webp" },
-  { id: "6", name: "Miniatura 50ml (Sortidas)", price: 19.9, image: "/products/c6.webp" },
-  { id: "7", name: "Cachaça Gold Barrel", price: 149.9, image: "/products/c7.webp" },
-  { id: "8", name: "Cachaça Vintage 1980", price: 199.9, image: "/products/c8.webp" },
-  { id: "9", name: "Reserva Especial 750ml", price: 119.9, image: "/products/c9.webp" },
-  { id: "10", name: "Fine Anejo 500ml", price: 159.9, image: "/products/c10.webp" },
-  { id: "11", name: "Clássica 600ml", price: 59.9, image: "/products/c11.webp" },
-  { id: "12", name: "Premium Silver 700ml", price: 109.9, image: "/products/c12.webp" },
-];
+interface FetchedProduct {
+  _id: string;
+  name: string;
+  price: number;
+  images: string[];
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const pageSize = 6;
 
   useEffect(() => {
-    setProducts(allProducts);
+    fetch("http://localhost:4000/api/products")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        return res.json();
+      })
+      .then((data: FetchedProduct[]) => {
+        const prods: Product[] = data.map((p) => ({
+          id: p._id,
+          name: p.name,
+          price: p.price,
+          image: p.images[0] || "",
+        }));
+        setProducts(prods);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Não foi possível carregar os produtos.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const parseBRL = (value: string): number | null => {
@@ -52,14 +64,13 @@ export default function ProductsPage() {
     return filtered.slice(start, start + pageSize);
   }, [filtered, page]);
 
-  const onMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMinPrice(e.target.value);
-    setPage(1);
-  };
-  const onMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMaxPrice(e.target.value);
-    setPage(1);
-  };
+  if (loading) {
+    return <p className="pt-[50px] text-center">Carregando produtos...</p>;
+  }
+
+  if (error) {
+    return <p className="pt-[50px] text-center text-red-500">{error}</p>;
+  }
 
   return (
     <div className="pt-[50px] pb-16 bg-gray-50">
@@ -75,7 +86,10 @@ export default function ProductsPage() {
               type="text"
               inputMode="decimal"
               value={minPrice}
-              onChange={onMinChange}
+              onChange={(e) => {
+                setMinPrice(e.target.value);
+                setPage(1);
+              }}
               placeholder="0,00"
               className="border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
             />
@@ -86,7 +100,10 @@ export default function ProductsPage() {
               type="text"
               inputMode="decimal"
               value={maxPrice}
-              onChange={onMaxChange}
+              onChange={(e) => {
+                setMaxPrice(e.target.value);
+                setPage(1);
+              }}
               placeholder="0,00"
               className="border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
             />
@@ -112,7 +129,9 @@ export default function ProductsPage() {
               key={num}
               onClick={() => setPage(num)}
               className={`px-4 py-2 border rounded-xl ${
-                page === num ? "bg-[#0d1b2b] text-white" : "bg-white hover:bg-gray-100"
+                page === num
+                  ? "bg-[#0d1b2b] text-white"
+                  : "bg-white hover:bg-gray-100"
               }`}
             >
               {num}

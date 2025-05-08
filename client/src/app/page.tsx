@@ -1,5 +1,8 @@
 // client/src/app/page.tsx
-"use client";
+export const metadata = {
+  title: "Pinga Etc e Tal",
+  description: "E-commerce de cachaças",
+};
 
 import BannerSlider from "@/components/BannerSlider";
 import ProductsSection from "@/components/ProductsSection";
@@ -7,7 +10,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import AboutSection from "@/components/AboutSection";
 import ContactSection from "@/components/ContactSection";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
       <BannerSlider />
