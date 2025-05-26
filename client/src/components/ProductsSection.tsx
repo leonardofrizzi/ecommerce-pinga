@@ -1,66 +1,60 @@
-// client/src/components/ProductsSection.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { FiShoppingCart } from "react-icons/fi";
 import Link from "next/link";
+import ProductCard from "@/components/ProductCard";
 
 interface Product {
-  id: string;
+  _id: string;
   name: string;
   price: number;
-  image: string;
+  images: string[];
 }
-
-const sampleProducts: Product[] = [
-  {
-    id: "1",
-    name: "Cachaça Ouro 500ml",
-    price: 79.9,
-    image: "/products/c1.webp",
-  },
-  {
-    id: "2",
-    name: "Cachaça Prata 700ml",
-    price: 89.9,
-    image: "/products/c2.webp",
-  },
-  {
-    id: "3",
-    name: "Kit Degustação 3x200ml",
-    price: 49.9,
-    image: "/products/c3.webp",
-  },
-  {
-    id: "4",
-    name: "Cachaça Premium 1L",
-    price: 129.9,
-    image: "/products/c4.webp",
-  },
-  {
-    id: "5",
-    name: "Cachaça Artesanal 750ml",
-    price: 99.9,
-    image: "/products/c5.webp",
-  },
-  {
-    id: "6",
-    name: "Miniatura 50ml (Sortidas)",
-    price: 19.9,
-    image: "/products/c6.webp",
-  },
-];
 
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setProducts(sampleProducts);
+    fetch("/api/produtos")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        return res.json();
+      })
+      .then((data: Product[]) => {
+        const shuffled = data.sort(() => Math.random() - 0.5);
+        setProducts(shuffled.slice(0, 6));
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Não foi possível carregar os produtos.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
+  if (loading) {
+    return (
+      <section className="pt-[50px] pb-16 bg-gray-50">
+        <div className="max-w-screen-xl mx-auto text-center">
+          <p>Carregando produtos...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="pt-[50px] pb-16 bg-gray-50">
+        <div className="max-w-screen-xl mx-auto text-center text-red-600">
+          <p>{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="produtos" className="pt-[50px] pb-16 bg-gray-50">
+    <section id="produtos" className="pt-[50px] pb-16 bg-gray-50 px-6 md:px-0">
       <div className="max-w-screen-xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
           Nossos Produtos
@@ -68,38 +62,21 @@ export default function ProductsSection() {
         <p className="text-lg text-gray-600 mb-8 text-center">
           Descubra nossa seleção de cachaças premium e promoções exclusivas.
         </p>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((p) => (
-            <div
-              key={p.id}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col"
-            >
-              <div className="relative w-full h-64">
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {p.name}
-                </h3>
-                <p className="text-lg text-green-600 font-bold mb-4">
-                  R$ {p.price.toFixed(2).replace(".", ",")}
-                </p>
-                <button className="mt-auto flex items-center justify-center w-full bg-[#0d1b2b] text-white py-2 rounded transition-colors hover:bg-[#CDAF70]">
-                  <FiShoppingCart className="mr-2" />
-                  Adicionar ao Carrinho
-                </button>
-              </div>
-            </div>
+            <ProductCard
+              key={p._id}
+              product={{
+                id: p._id,
+                name: p.name,
+                price: p.price,
+                image: p.images[0] || "",
+              }}
+            />
           ))}
         </div>
 
-        {/* Ver todos os produtos */}
         <div className="mt-12 text-center">
           <Link
             href="/produtos"

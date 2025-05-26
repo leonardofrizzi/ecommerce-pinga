@@ -1,4 +1,3 @@
-// client/src/app/admin/page.tsx
 "use client";
 
 import React, {
@@ -25,7 +24,6 @@ interface FormState {
   ncm: string;
 }
 
-// Produto vindo da API (mongoose)
 interface FetchedProduct {
   _id: string;
   name: string;
@@ -44,7 +42,6 @@ interface FetchedProduct {
   ncm: string;
 }
 
-// Nosso tipo de produto no frontend
 type Product = {
   id: string;
   name: string;
@@ -63,7 +60,6 @@ type Product = {
   ncm: string;
 };
 
-// Estado inicial do formulário
 const emptyForm: FormState = {
   name: "",
   price: "",
@@ -81,10 +77,7 @@ const emptyForm: FormState = {
   ncm: "",
 };
 
-// Definição tipada dos campos técnicos
-const techFields: Array<
-  [keyof Omit<FormState, "images">, string]
-> = [
+const techFields: Array<[keyof Omit<FormState, "images">, string]> = [
   ["ean", "EAN"],
   ["vendaUnidade", "Unidade de Venda"],
   ["volume", "Volume"],
@@ -102,10 +95,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Busca produtos da API
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/products");
+      const res = await fetch("/api/produtos");
       const data = (await res.json()) as FetchedProduct[];
       setProducts(
         data.map((p) => ({
@@ -135,7 +127,6 @@ export default function AdminPage() {
     fetchProducts();
   }, []);
 
-  // Atualiza campos do form
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     idx?: number
@@ -154,7 +145,6 @@ export default function AdminPage() {
     setForm((f) => ({ ...f, images: [...f.images, ""] }));
   };
 
-  // Cria ou atualiza produto
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -179,8 +169,8 @@ export default function AdminPage() {
       };
 
       const url = editingId
-        ? `/api/products/${editingId}`
-        : "/api/products";
+        ? `/api/produtos/${editingId}`
+        : "/api/produtos";
       const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -190,9 +180,7 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
 
-      setMessage(
-        editingId ? "Produto atualizado!" : "Produto criado!"
-      );
+      setMessage(editingId ? "Produto atualizado!" : "Produto criado!");
       setForm({ ...emptyForm });
       setEditingId(null);
       await fetchProducts();
@@ -203,7 +191,6 @@ export default function AdminPage() {
     }
   };
 
-  // Preenche form para editar
   const handleEdit = (p: Product) => {
     setEditingId(p.id);
     setForm({
@@ -225,10 +212,9 @@ export default function AdminPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Exclui produto
   const handleDelete = async (id: string) => {
     if (!confirm("Confirma exclusão deste produto?")) return;
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
+    await fetch(`/api/produtos/${id}`, { method: "DELETE" });
     await fetchProducts();
   };
 
@@ -239,7 +225,6 @@ export default function AdminPage() {
           Painel Admin
         </h1>
 
-        {/* Formulário */}
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-xl shadow-lg overflow-hidden"
@@ -248,16 +233,13 @@ export default function AdminPage() {
             {message && (
               <p
                 className={`text-center ${
-                  message.includes("Erro")
-                    ? "text-red-600"
-                    : "text-green-600"
+                  message.includes("Erro") ? "text-red-600" : "text-green-600"
                 }`}
               >
                 {message}
               </p>
             )}
 
-            {/* Nome & Preço */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="block font-medium mb-1">
@@ -285,7 +267,6 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Imagens */}
             <div>
               <label className="block font-medium mb-1">
                 URLs de Imagem
@@ -309,12 +290,9 @@ export default function AdminPage() {
               </button>
             </div>
 
-            {/* Descrição & Categoria */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label className="block font-medium mb-1">
-                  Descrição
-                </label>
+                <label className="block font-medium mb-1">Descrição</label>
                 <textarea
                   name="description"
                   value={form.description}
@@ -324,9 +302,7 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block font-medium mb-1">
-                  Categoria
-                </label>
+                <label className="block font-medium mb-1">Categoria</label>
                 <input
                   name="category"
                   value={form.category}
@@ -336,13 +312,10 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Campos Técnicos */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {techFields.map(([key, label]) => (
                 <div key={key}>
-                  <label className="block font-medium mb-1">
-                    {label}
-                  </label>
+                  <label className="block font-medium mb-1">{label}</label>
                   <input
                     name={key}
                     value={form[key] as string}
@@ -353,11 +326,8 @@ export default function AdminPage() {
               ))}
             </div>
 
-            {/* Estoque */}
             <div>
-              <label className="block font-medium mb-1">
-                Estoque
-              </label>
+              <label className="block font-medium mb-1">Estoque</label>
               <input
                 name="stock"
                 value={form.stock}
@@ -369,14 +339,14 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#0d1b2b] text-white py-3 rounded-xl font-medium transition-colors hover:bg-[#CDAF70] disabled:opacity-50"
+              className="w-full bg-[#0d1b2b] text-white py-3 rounded-
+              xl font-medium transition-colors hover:bg-[#CDAF70] disabled:opacity-50"
             >
               {editingId ? "Salvar Alterações" : "Criar Produto"}
             </button>
           </div>
         </form>
 
-        {/* Tabela de Produtos */}
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-xl shadow-lg">
             <thead>
@@ -392,9 +362,7 @@ export default function AdminPage() {
               {products.map((p) => (
                 <tr key={p.id} className="border-b last:border-none">
                   <td className="px-6 py-4">{p.name}</td>
-                  <td className="px-6 py-4">
-                    R$ {p.price.toFixed(2)}
-                  </td>
+                  <td className="px-6 py-4">R$ {p.price.toFixed(2)}</td>
                   <td className="px-6 py-4">{p.category}</td>
                   <td className="px-6 py-4">{p.stock}</td>
                   <td className="px-6 py-4 space-x-2">
@@ -418,5 +386,5 @@ export default function AdminPage() {
         </div>
       </div>
     </div>
-  );
+);
 }

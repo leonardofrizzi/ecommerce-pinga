@@ -1,4 +1,3 @@
-// client/src/components/ContactSection.tsx
 "use client";
 
 import { useState } from "react";
@@ -23,7 +22,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="md:pt-[50px] pb-16 bg-gray-50">
+    <section id="contact" className="md:pt-[50px] pb-16 bg-gray-50 px-6 md:px-0">
       <div className="max-w-screen-xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden p-6 md:p-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">

@@ -1,4 +1,3 @@
-// client/src/components/FeaturesSection.tsx
 "use client";
 
 import { FiShield, FiTruck, FiHeadphones, FiGift } from "react-icons/fi";
@@ -29,7 +28,7 @@ export default function FeaturesSection() {
   ];
 
   return (
-    <section id="features" className="md:pt-[50px] pb-16 bg-gray-50">
+    <section id="features" className="md:pt-[50px] pb-16 bg-gray-50 px-6 md:px-0">
       <div className="max-w-screen-xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           Por que escolher a Pinga Etc e Tal?

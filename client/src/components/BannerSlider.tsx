@@ -1,4 +1,3 @@
-// client/src/components/BannerSlider.tsx
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -21,7 +20,6 @@ export default function BannerSlider() {
   const [isMobile, setIsMobile] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Responsividade
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     onResize();
@@ -31,7 +29,6 @@ export default function BannerSlider() {
 
   const banners = isMobile ? mobileBanners : desktopBanners;
 
-  // Auto-advance
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
       setIndex((prev) => (prev + 1) % banners.length);
@@ -54,7 +51,7 @@ export default function BannerSlider() {
   };
 
   return (
-    <div className="relative overflow-hidden w-full px-0 md:max-w-screen-xl md:mx-auto md:px-6 md:pt-[50px]">
+    <div className="relative overflow-hidden w-full md:max-w-screen-xl md:mx-auto md:pt-[50px]">
       <div className="relative overflow-hidden">
         {banners.map((b, i) => {
           const isActive = i === index;
@@ -81,7 +78,6 @@ export default function BannerSlider() {
         })}
       </div>
 
-      {/* Dots inside image */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
         {banners.map((_, i) => (
           <button

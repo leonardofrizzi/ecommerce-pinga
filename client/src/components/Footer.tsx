@@ -1,4 +1,3 @@
-// client/src/components/Footer.tsx
 "use client";
 
 import Link from "next/link";
@@ -9,7 +8,7 @@ import { SiTiktok } from "react-icons/si";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0d1b2b] text-white pt-[50px] pb-8">
+    <footer className="bg-[#0d1b2b] text-white pt-[50px] pb-8 px-6 md:px-0">
       <div className="max-w-screen-xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <Link href="/">
@@ -23,9 +22,9 @@ export default function Footer() {
           </Link>
           <nav className="flex space-x-4">
             <Link href="/" className="hover:text-[#CDAF70]">Home</Link>
-            <Link href="/produtos" className="hover:text-[#CDAF70]">Produtos</Link>
-            <Link href="/about" className="hover:text-[#CDAF70]">Sobre</Link>
-            <Link href="/contact" className="hover:text-[#CDAF70]">Contato</Link>
+            <Link href="/#produtos" className="hover:text-[#CDAF70]">Produtos</Link>
+            <Link href="/#sobre" className="hover:text-[#CDAF70]">Sobre</Link>
+            <Link href="/#contato" className="hover:text-[#CDAF70]">Contato</Link>
           </nav>
           <div className="flex space-x-4">
             <Link href="https://www.tiktok.com/@pingaetcetal" target="_blank" className="hover:text-[#CDAF70]">

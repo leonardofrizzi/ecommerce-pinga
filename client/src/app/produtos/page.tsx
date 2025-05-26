@@ -1,8 +1,8 @@
-// client/src/app/produtos/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import ProductCard, { Product } from "@/components/ProductCard";
+import { useSearchParams } from "next/navigation";
+import ProductCard from "@/components/ProductCard";
 
 interface FetchedProduct {
   _id: string;
@@ -12,7 +12,10 @@ interface FetchedProduct {
 }
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("search")?.toLowerCase() ?? "";
+
+  const [products, setProducts] = useState<FetchedProduct[]>([]);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -21,42 +24,41 @@ export default function ProductsPage() {
   const pageSize = 6;
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/products")
+    setLoading(true);
+    fetch("/api/produtos")
       .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();
       })
       .then((data: FetchedProduct[]) => {
-        const prods: Product[] = data.map((p) => ({
-          id: p._id,
-          name: p.name,
-          price: p.price,
-          image: p.images[0] || "",
-        }));
-        setProducts(prods);
+        setProducts(data);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
         setError("Não foi possível carregar os produtos.");
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const parseBRL = (value: string): number | null => {
-    const cleaned = value.replace(/[^\d,\.]/g, "").replace(",", ".");
-    const num = parseFloat(cleaned);
-    return isNaN(num) ? null : num;
+  const parseBRL = (v: string): number | null => {
+    const n = parseFloat(v.replace(/[^\d,\.]/g, "").replace(",", "."));
+    return isNaN(n) ? null : n;
   };
 
   const filtered = useMemo(() => {
-    return products.filter((p) => {
-      const min = parseBRL(minPrice);
-      const max = parseBRL(maxPrice);
-      if (min !== null && p.price < min) return false;
-      if (max !== null && p.price > max) return false;
-      return true;
-    });
-  }, [products, minPrice, maxPrice]);
+    return products
+      .filter((p) =>
+        searchQuery
+          ? p.name.toLowerCase().includes(searchQuery)
+          : true
+      )
+      .filter((p) => {
+        const min = parseBRL(minPrice);
+        const max = parseBRL(maxPrice);
+        if (min !== null && p.price < min) return false;
+        if (max !== null && p.price > max) return false;
+        return true;
+      });
+  }, [products, minPrice, maxPrice, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = useMemo(() => {
@@ -67,16 +69,17 @@ export default function ProductsPage() {
   if (loading) {
     return <p className="pt-[50px] text-center">Carregando produtos...</p>;
   }
-
   if (error) {
     return <p className="pt-[50px] text-center text-red-500">{error}</p>;
   }
 
   return (
-    <div className="pt-[50px] pb-16 bg-gray-50">
-      <div className="max-w-screen-xl mx-auto px-6">
+    <div className="pt-[50px] pb-16 bg-gray-50 px-6 md:px-0">
+      <div className="max-w-screen-xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-          Todos os Produtos
+          {searchQuery
+            ? `Resultados para “${searchQuery}”`
+            : "Todos os Produtos"}
         </h1>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 mb-8">
@@ -112,7 +115,15 @@ export default function ProductsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {paginated.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard
+              key={p._id}
+              product={{
+                id: p._id,
+                name: p.name,
+                price: p.price,
+                image: p.images[0] || "",
+              }}
+            />
           ))}
         </div>
 

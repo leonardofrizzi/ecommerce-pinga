@@ -1,9 +1,3 @@
-// client/src/app/page.tsx
-export const metadata = {
-  title: "Pinga Etc e Tal",
-  description: "E-commerce de cachaças",
-};
-
 import BannerSlider from "@/components/BannerSlider";
 import ProductsSection from "@/components/ProductsSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -15,7 +9,7 @@ export default function HomePage() {
     <>
       <BannerSlider />
 
-      <main className="space-y-16 py-8 px-6">
+      <main className="space-y-16 py-8">
         <ProductsSection />
         <FeaturesSection />
         <AboutSection />

@@ -1,7 +1,13 @@
 // client/src/contexts/CartContext.tsx
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from "react";
 import { Product } from "@/components/ProductCard";
 
 export interface FreteOption {
@@ -24,12 +30,17 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+
+  // drawer
+  drawerOpen: boolean;
+  toggleDrawer: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const addToCart = (product: CartItem) => {
     setItems((prev) => {
@@ -67,9 +78,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     0
   );
 
+  const toggleDrawer = useCallback(() => {
+    setDrawerOpen((open) => !open);
+  }, []);
+
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        totalPrice,
+        drawerOpen,
+        toggleDrawer,
+      }}
     >
       {children}
     </CartContext.Provider>
