@@ -9,3 +9,4 @@ export async function connectDB(): Promise<void> {
     console.log("MongoDB conectado");
   }
 }
+console.log("MONGODB_URI:", process.env.MONGODB_URI);

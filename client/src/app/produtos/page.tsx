@@ -25,7 +25,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("/api/produtos")
+    fetch("https://api.pinga.etc.br/api/produtos")
       .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();

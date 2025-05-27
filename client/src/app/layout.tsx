@@ -13,9 +13,9 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR h-full">
       <head />
-      <body suppressHydrationWarning className="bg-gray-50 relative">
+      <body suppressHydrationWarning className="bg-gray-50 relative min-h-screen">
         <ClientProviders>
           <CartDrawer />
           <main className="max-w-screen-xl mx-auto">{children}</main>

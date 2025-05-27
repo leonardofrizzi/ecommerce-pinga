@@ -1,0 +1,42 @@
+service: ecommerce-pinga-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: sa-east-1
+  stage: prod
+  deploymentPrefix: ''  
+  timeout: 30
+  environment:
+    STRIPE_SECRET_KEY: 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
+    MONGODB_URI: mongodb+srv://pingaetcetal:rGeMJSDuiVBiiWFu@pinga-db.egbowzj.mongodb.net/pingaetcetal?retryWrites=true&w=majority
+
+functions:
+  api:
+    handler: src/lambda.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+package:
+  individually: true
+
+plugins:
+  - serverless-esbuild
+  - serverless-dotenv-plugin
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: ['aws-sdk']
+    target: 'node18'
+    define:
+      'require.resolve': undefined
+    platform: 'node'
+    concurrency: 10

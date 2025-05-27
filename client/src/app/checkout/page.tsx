@@ -1,4 +1,3 @@
-// client/src/app/checkout/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -7,8 +6,9 @@ import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+  "pk_live_51R6aKTGdQrTu9hK3LggAl4OGzSvzEhtFneb4PC3uJNCBCeD9TxNUBTWxlnxeHAwOGXCO9wyxcYT7jatAKIEi7aI"
 );
+
 
 interface CustomerForm {
   fullName: string;
@@ -49,10 +49,7 @@ export default function CheckoutPage() {
     setCouponMsg(null);
   }
 
-  const productsTotal = items.reduce(
-    (sum, p) => sum + p.price * p.quantity,
-    0
-  );
+  const productsTotal = items.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const shippingTotal = items.reduce(
     (sum, p) => sum + (p.shipping?.price || 0) * p.quantity,
     0
@@ -79,19 +76,31 @@ export default function CheckoutPage() {
     setErrorMsg(null);
 
     try {
-      const res = await fetch("/api/checkout", {
+      const origin = window.location.origin;
+      const payload = {
+        items: items.map((i) => ({
+          name: i.name,
+          amount: Math.round(i.price * 100),
+          quantity: i.quantity,
+        })),
+        successUrl: `${origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${origin}/`,
+      };
+      const res = await fetch("https://api.pinga.etc.br/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customer: form, items }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const { sessionId }: { sessionId: string } = await res.json();
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Status ${res.status}`);
+      }
+
       const stripe = await stripePromise;
-      await stripe!.redirectToCheckout({ sessionId });
+      await stripe!.redirectToCheckout({ sessionId: data.sessionId });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Erro inesperado no checkout";
-      setErrorMsg(message);
+      setErrorMsg(err instanceof Error ? err.message : "Erro inesperado");
       setLoading(false);
     }
   }
@@ -104,15 +113,12 @@ export default function CheckoutPage() {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* FORMULÁRIO */}
           <form
             onSubmit={handleSubmit}
             className="space-y-6 bg-white p-6 rounded-xl shadow"
           >
             <div>
-              <label className="block text-gray-700 mb-1">
-                Nome completo
-              </label>
+              <label className="block text-gray-700 mb-1">Nome completo</label>
               <input
                 name="fullName"
                 value={form.fullName}
@@ -121,7 +127,6 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
               />
             </div>
-
             <div>
               <label className="block text-gray-700 mb-1">Email</label>
               <input
@@ -133,7 +138,6 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 mb-1">CEP</label>
@@ -156,7 +160,6 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-gray-700 mb-1">Endereço</label>
               <input
@@ -167,7 +170,6 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
               />
             </div>
-
             <div>
               <label className="block text-gray-700 mb-1">Complemento</label>
               <input
@@ -177,7 +179,6 @@ export default function CheckoutPage() {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-[#CDAF70] outline-none"
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-700 mb-1">Cidade</label>
@@ -214,7 +215,6 @@ export default function CheckoutPage() {
             </button>
           </form>
 
-          {/* RESUMO DO PEDIDO */}
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
@@ -227,17 +227,18 @@ export default function CheckoutPage() {
                     className="flex items-center justify-between py-3"
                   >
                     <div className="flex items-center">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden mr-4 bg-gray-100">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden mr-4 bg-gray-100">
                         {item.image && (
                           <Image
                             src={item.image}
                             alt={item.name}
-                            width={48}
-                            height={48}
+                            fill
                             className="object-cover"
+                            priority={false}
                           />
                         )}
                       </div>
+
                       <div>
                         <p className="text-gray-800">{item.name}</p>
                         <p className="text-sm text-gray-600">
@@ -259,36 +260,23 @@ export default function CheckoutPage() {
               <div className="mt-4 space-y-2 text-gray-800">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>
-                    R${" "}
-                    {productsTotal.toFixed(2).replace(".", ",")}
-                  </span>
+                  <span>R$ {productsTotal.toFixed(2).replace(".", ",")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Frete:</span>
-                  <span>
-                    R${" "}
-                    {shippingTotal.toFixed(2).replace(".", ",")}
-                  </span>
+                  <span>R$ {shippingTotal.toFixed(2).replace(".", ",")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Desconto:</span>
-                  <span>
-                    - R${" "}
-                    {discount.toFixed(2).replace(".", ",")}
-                  </span>
+                  <span>- R$ {discount.toFixed(2).replace(".", ",")}</span>
                 </div>
                 <div className="flex justify-between font-semibold">
                   <span>Total:</span>
-                  <span>
-                    R${" "}
-                    {grandTotal.toFixed(2).replace(".", ",")}
-                  </span>
+                  <span>R$ {grandTotal.toFixed(2).replace(".", ",")}</span>
                 </div>
               </div>
             </div>
 
-            {/* CUPOM ABAIXO DO RESUMO */}
             <div className="bg-white p-6 rounded-xl shadow">
               <h3 className="text-lg font-medium text-gray-800 mb-4">
                 Tem um cupom de desconto?

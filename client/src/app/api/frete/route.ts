@@ -15,37 +15,54 @@ export async function GET(request: Request) {
     );
   }
 
+  const cepDestinoLimpo = cepDestino.replace(/\D/g, "");
+  if (cepDestinoLimpo.length !== 8) {
+      return NextResponse.json(
+          { error: 'CEP de destino inválido. Deve conter 8 números.' },
+          { status: 400 }
+      );
+  }
+
   try {
     const response = await calcularPrecoPrazo({
-      nCdEmpresa: '',                   // sem contrato
+      nCdEmpresa: '',
       sDsSenha: '',
-      nCdServico: ['04510', '04014'],   // SEDEX e PAC
-      sCepOrigem: '01001000',           // seu CEP de origem
-      sCepDestino: cepDestino,          // string
-      nVlPeso: peso,                    // string
-      nCdFormato: '1',                  // string
-      nVlComprimento: '20',             // string
+      nCdServico: ['04510', '04014'],
+      sCepOrigem: '37704273', // <-- ATENÇÃO: Verifique se este é seu CEP de origem correto
+      sCepDestino: cepDestinoLimpo,
+      nVlPeso: peso,
+      nCdFormato: '1',
+      nVlComprimento: '20',
       nVlAltura: '5',
       nVlLargura: '15',
       nVlDiametro: '0',
       sCdMaoPropria: 'N',
-      nVlValorDeclarado: valorDeclarado, // string
+      nVlValorDeclarado: valorDeclarado,
       sCdAvisoRecebimento: 'N',
     });
 
     const resultados = Array.isArray(response) ? response : [response];
-    const formato = resultados.map((t) => ({
+    const validos = resultados.filter(
+        (r) => r.Erro === '0' && parseFloat(r.Valor.replace(',', '.')) > 0
+    );
+
+    const formato = validos.map((t) => ({
       code: t.Codigo,
-      service: t.Codigo === '04014' ? 'SEDEX' : 'PAC',
+      service: t.Codigo === '04014' ? 'SEDEX' : (t.Codigo === '04510' ? 'PAC' : 'Desconhecido'),
       price: parseFloat(t.Valor.replace(',', '.')),
       deadline: parseInt(t.PrazoEntrega, 10),
     }));
 
     return NextResponse.json(formato);
-  } catch (error) {
-    console.error(error);
+  } catch (error: unknown) { // <-- MUDANÇA: 'any' para 'unknown'
+    console.error("Erro na API /api/frete:", error);
+    let errorMessage = 'Erro interno ao calcular frete.';
+    // <-- MUDANÇA: Verifica se é um Erro para pegar a mensagem
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    }
     return NextResponse.json(
-      { error: 'Erro ao calcular frete.' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

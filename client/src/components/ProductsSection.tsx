@@ -17,7 +17,7 @@ export default function ProductsSection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/produtos")
+    fetch("https://api.pinga.etc.br/api/produtos")
       .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();
