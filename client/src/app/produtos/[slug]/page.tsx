@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { FiShoppingCart } from "react-icons/fi";
+import { FiShoppingCart } from "react-icons/fi"; // Certifique-se que react-icons está no package.json
 import { useCart } from "@/contexts/CartContext";
 import ProductCard from "@/components/ProductCard";
 import { slugify } from "@/utils/slugify";
@@ -22,19 +22,16 @@ interface Product {
 
 interface ShippingOption {
   code: string;
-  service: "PAC" | "SEDEX" | "Desconhecido"; // <-- Adicionado "Desconhecido" por segurança
+  service: "PAC" | "SEDEX" | "Desconhecido";
   price: number;
   deadline: number;
 }
 
-// <-- MUDANÇA: Removido o 'serviceNameMap' pois não é mais usado.
+// Removida a interface ProductPageProps
 
-interface ProductPageProps {
-  params: { slug: string };
-}
-
-export default function ProductPage({ params }: ProductPageProps) {
-  const { slug } = params;
+// MUDANÇA AQUI: Tipagem inline para os props
+export default function ProductPage({ params }: { params: { slug: string } }) {
+  const { slug } = params; // slug é extraído de params
   const { addToCart } = useCart();
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -165,10 +162,10 @@ export default function ProductPage({ params }: ProductPageProps) {
         setShippingError(null);
       }
 
-    } catch (err: unknown) { // <-- 'any' para 'unknown' aqui também
+    } catch (err: unknown) {
       console.error("FRONTEND CATCH: Erro ao calcular frete:", err);
       let message = "Não foi possível calcular o frete. Verifique sua conexão e tente novamente.";
-      if (err instanceof Error) { // Verifica se é um Erro
+      if (err instanceof Error) {
           message = err.message;
       }
       setShippingError(message);
