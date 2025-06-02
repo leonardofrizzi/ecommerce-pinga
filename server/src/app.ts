@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./db";
@@ -14,11 +14,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  console.log("--- NOVA REQUISIÇÃO ---");
+  console.log("Timestamp:", new Date().toISOString());
+  console.log("Método:", req.method);
+  console.log("Caminho:", req.path);
+  console.log("Query:", req.query);
+  next();
+});
+
 connectDB()
-  .then(() => console.log("MongoDB conectado com sucesso"))
+  .then(() => console.log("MongoDB: Conexão inicial estabelecida com sucesso."))
   .catch((err: unknown) => {
-    console.error("Erro ao conectar no DB:", (err as Error).message);
-    process.exit(1);
+    console.error("MongoDB: Erro INICIAL ao conectar:", (err as Error).message);
   });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -35,16 +43,16 @@ interface ResultadoCorreiosItem {
 app.get(
   "/api/produtos",
   async (_req: Request, res: Response): Promise<void> => {
+    console.log("ROTA: GET /api/produtos - Iniciando...");
     try {
       const produtos = await Product.find();
+      console.log(`ROTA: GET /api/produtos - Encontrados ${produtos.length} produtos.`);
       res.json(produtos);
     } catch (err: unknown) {
-      console.error("Erro ao buscar produtos:", err);
-      res
-        .status(500)
-        .json({
-          error: (err as Error).message || "Erro interno ao buscar produtos.",
-        });
+      console.error("ROTA: GET /api/produtos - Erro:", err);
+      res.status(500).json({
+        error: (err as Error).message || "Erro interno ao buscar produtos.",
+      });
     }
   }
 );
@@ -52,20 +60,21 @@ app.get(
 app.get(
   "/api/produtos/:id",
   async (req: Request, res: Response): Promise<void> => {
+    console.log(`ROTA: GET /api/produtos/${req.params.id} - Iniciando...`);
     try {
       const prod = await Product.findById(req.params.id);
       if (!prod) {
+        console.log(`ROTA: GET /api/produtos/${req.params.id} - Produto não encontrado (404).`);
         res.status(404).json({ error: "Produto não encontrado" });
         return;
       }
+      console.log(`ROTA: GET /api/produtos/${req.params.id} - Produto encontrado.`);
       res.json(prod);
     } catch (err: unknown) {
-      console.error(`Erro ao buscar produto ${req.params.id}:`, err);
-      res
-        .status(500)
-        .json({
-          error: (err as Error).message || "Erro interno ao buscar produto.",
-        });
+      console.error(`ROTA: GET /api/produtos/${req.params.id} - Erro:`, err);
+      res.status(500).json({
+        error: (err as Error).message || "Erro interno ao buscar produto.",
+      });
     }
   }
 );
@@ -73,30 +82,24 @@ app.get(
 app.post(
   "/api/produtos",
   async (req: Request, res: Response): Promise<void> => {
+    console.log("ROTA: POST /api/produtos - Iniciando...");
     try {
       const novo = new Product(req.body as Partial<IProduct>);
       await novo.save();
+      console.log("ROTA: POST /api/produtos - Produto criado:", novo._id);
       res.status(201).json(novo);
     } catch (err: unknown) {
-      console.error("Erro ao criar produto:", err);
-      if (
-        err instanceof Error &&
-        "name" in err &&
-        err.name === "ValidationError"
-      ) {
-        res
-          .status(400)
-          .json({
-            error: "Dados inválidos para criação do produto.",
-            details: (err as any).errors,
-          });
+      console.error("ROTA: POST /api/produtos - Erro:", err);
+      if (err instanceof Error && "name" in err && err.name === "ValidationError") {
+        res.status(400).json({
+          error: "Dados inválidos para criação do produto.",
+          details: (err as any).errors,
+        });
         return;
       }
-      res
-        .status(500)
-        .json({
-          error: (err as Error).message || "Erro interno ao criar produto.",
-        });
+      res.status(500).json({
+        error: (err as Error).message || "Erro interno ao criar produto.",
+      });
     }
   }
 );
@@ -104,6 +107,7 @@ app.post(
 app.put(
   "/api/produtos/:id",
   async (req: Request, res: Response): Promise<void> => {
+    console.log(`ROTA: PUT /api/produtos/${req.params.id} - Iniciando...`);
     try {
       const updated = await Product.findByIdAndUpdate(
         req.params.id,
@@ -111,32 +115,24 @@ app.put(
         { new: true, runValidators: true }
       );
       if (!updated) {
-        res
-          .status(404)
-          .json({ error: "Produto não encontrado para atualização" });
+        console.log(`ROTA: PUT /api/produtos/${req.params.id} - Produto não encontrado (404).`);
+        res.status(404).json({ error: "Produto não encontrado para atualização" });
         return;
       }
+      console.log(`ROTA: PUT /api/produtos/${req.params.id} - Produto atualizado.`);
       res.json(updated);
     } catch (err: unknown) {
-      console.error(`Erro ao atualizar produto ${req.params.id}:`, err);
-      if (
-        err instanceof Error &&
-        "name" in err &&
-        err.name === "ValidationError"
-      ) {
-        res
-          .status(400)
-          .json({
-            error: "Dados inválidos para atualização do produto.",
-            details: (err as any).errors,
-          });
+      console.error(`ROTA: PUT /api/produtos/${req.params.id} - Erro:`, err);
+      if (err instanceof Error && "name" in err && err.name === "ValidationError") {
+        res.status(400).json({
+          error: "Dados inválidos para atualização do produto.",
+          details: (err as any).errors,
+        });
         return;
       }
-      res
-        .status(500)
-        .json({
-          error: (err as Error).message || "Erro interno ao atualizar produto.",
-        });
+      res.status(500).json({
+        error: (err as Error).message || "Erro interno ao atualizar produto.",
+      });
     }
   }
 );
@@ -144,50 +140,52 @@ app.put(
 app.delete(
   "/api/produtos/:id",
   async (req: Request, res: Response): Promise<void> => {
+    console.log(`ROTA: DELETE /api/produtos/${req.params.id} - Iniciando...`);
     try {
       const deleted = await Product.findByIdAndDelete(req.params.id);
       if (!deleted) {
+        console.log(`ROTA: DELETE /api/produtos/${req.params.id} - Produto não encontrado (404).`);
         res.status(404).json({ error: "Produto não encontrado para deletar" });
         return;
       }
+      console.log(`ROTA: DELETE /api/produtos/${req.params.id} - Produto deletado.`);
       res.sendStatus(204);
     } catch (err: unknown) {
-      console.error(`Erro ao deletar produto ${req.params.id}:`, err);
-      res
-        .status(500)
-        .json({
-          error: (err as Error).message || "Erro interno ao deletar produto.",
-        });
+      console.error(`ROTA: DELETE /api/produtos/${req.params.id} - Erro:`, err);
+      res.status(500).json({
+        error: (err as Error).message || "Erro interno ao deletar produto.",
+      });
     }
   }
 );
 
 app.get("/api/frete", async (req: Request, res: Response): Promise<void> => {
+  console.log("ROTA: GET /api/frete - Iniciando com query:", req.query);
   const cepDestinoInput = req.query.cepDestino as string | undefined;
   const pesoInput = req.query.peso as string | undefined;
   const valorInput = req.query.valor as string | undefined;
 
   if (!cepDestinoInput) {
+    console.log("ROTA: GET /api/frete - Erro: cepDestino faltando.");
     res.status(400).json({ error: "Parâmetro 'cepDestino' é obrigatório." });
     return;
   }
   const cepDestinoFinal = cepDestinoInput.replace(/\D/g, "");
   if (cepDestinoFinal.length !== 8) {
-    res
-      .status(400)
-      .json({ error: "CEP de destino inválido. Deve conter 8 números." });
+    console.log("ROTA: GET /api/frete - Erro: cepDestino inválido.");
+    res.status(400).json({ error: "CEP de destino inválido. Deve conter 8 números." });
     return;
   }
 
   if (!pesoInput) {
+    console.log("ROTA: GET /api/frete - Erro: peso faltando.");
     res.status(400).json({ error: "Parâmetro 'peso' é obrigatório." });
     return;
   }
   const pesoNumerico = parseFloat(pesoInput.replace(",", "."));
   if (isNaN(pesoNumerico) || pesoNumerico <= 0) {
-    res
-      .status(400)
-      .json({ error: "Peso inválido. Deve ser um número maior que zero." });
+    console.log("ROTA: GET /api/frete - Erro: peso inválido.");
+    res.status(400).json({ error: "Peso inválido. Deve ser um número maior que zero." });
     return;
   }
   const pesoFinalFormatado = pesoNumerico.toFixed(3);
@@ -219,8 +217,7 @@ app.get("/api/frete", async (req: Request, res: Response): Promise<void> => {
     nIndicaCalculo: "3",
   };
 
-  try {
-    const queryParams = new URLSearchParams({
+  const queryParams = new URLSearchParams({
       sCepOrigem: argsBaseCorreios.sCepOrigem,
       sCepDestino: argsBaseCorreios.sCepDestino,
       nVlPeso: argsBaseCorreios.nVlPeso,
@@ -237,70 +234,60 @@ app.get("/api/frete", async (req: Request, res: Response): Promise<void> => {
       sDsSenha: argsBaseCorreios.sDsSenha,
       StrRetorno: argsBaseCorreios.StrRetorno,
       nIndicaCalculo: argsBaseCorreios.nIndicaCalculo,
-    });
+  });
 
-    const urlCorreiosHttp = `http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${queryParams.toString()}`;
+  const urlCorreiosHttp = `http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${queryParams.toString()}`;
+  console.log("ROTA: GET /api/frete - Chamando Correios:", urlCorreiosHttp);
 
+  try {
     await new Promise((resolve, reject) => {
       const reqHttp = http.get(urlCorreiosHttp, (resHttp) => {
         let data = "";
         resHttp.setEncoding("utf8");
-        resHttp.on("data", (chunk) => {
-          data += chunk;
-        });
+        resHttp.on("data", (chunk) => { data += chunk; });
         resHttp.on("end", () => {
-          if (
-            resHttp.statusCode === 200 &&
-            data.toLowerCase().includes("<servicos>")
-          ) {
+          if (resHttp.statusCode === 200 && data.toLowerCase().includes("<servicos>")) {
             resolve(true);
           } else {
-            reject(new Error(`Erro HTTP: ${resHttp.statusCode}`));
+            reject(new Error(`Erro HTTP: ${resHttp.statusCode} - Resposta: ${data.substring(0, 200)}`));
           }
         });
       });
-
       reqHttp.on("error", (e: NodeJS.ErrnoException) => reject(e));
-      reqHttp.setTimeout(20000, () =>
-        reqHttp.destroy(new Error("Timeout da requisição"))
-      );
+      reqHttp.setTimeout(20000, () => reqHttp.destroy(new Error("Timeout da requisição Correios")));
       reqHttp.end();
     });
 
-    res.json([
-      {
-        Codigo: "TEST_HTTP_OK",
-        Valor: "1.00",
-        PrazoEntrega: "1",
-        Erro: "0",
-        MsgErro: "Teste de conexão HTTP direta aos Correios bem-sucedido.",
-      },
-    ]);
+    console.log("ROTA: GET /api/frete - Sucesso na chamada Correios (Teste HTTP).");
+    res.json([ { Codigo: "TEST_HTTP_OK", Valor: "1.00", PrazoEntrega: "1", Erro: "0", MsgErro: "Teste de conexão HTTP direta aos Correios bem-sucedido." } ]);
+
   } catch (error: any) {
-    res
-      .status(504)
-      .json({ error: `Falha na conexão com os Correios: ${error.message}` });
+    console.error("ROTA: GET /api/frete - Erro na chamada Correios:", error);
+    res.status(504).json({ error: `Falha na conexão com os Correios: ${error.message}` });
   }
 });
+
 
 app.post(
   "/api/checkout",
   async (req: Request, res: Response): Promise<void> => {
-    const { items, successUrl, cancelUrl, shippingCost, customerEmail } =
-      req.body;
+    console.log("ROTA: POST /api/checkout - Iniciando...");
+    const { items, successUrl, cancelUrl, shippingCost, customerEmail } = req.body;
+    console.log("ROTA: POST /api/checkout - Itens:", items ? items.length : 0);
 
     if (!items || items.length === 0) {
+      console.log("ROTA: POST /api/checkout - Erro: Sem itens.");
       res.status(400).json({ error: "Nenhum item fornecido para checkout." });
       return;
     }
     if (!successUrl || !cancelUrl) {
-      res
-        .status(400)
-        .json({ error: "URLs de sucesso e cancelamento são obrigatórias." });
+      console.log("ROTA: POST /api/checkout - Erro: Sem URLs.");
+      res.status(400).json({ error: "URLs de sucesso e cancelamento são obrigatórias." });
       return;
     }
 
     try {
+      console.log("ROTA: POST /api/checkout - Preparando line_items...");
       const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] =
         items.map(
           (item: {
@@ -310,7 +297,6 @@ app.post(
             description?: string;
             images?: string[];
           }) => ({
-            
             price_data: {
               currency: "brl",
               product_data: {
@@ -326,6 +312,7 @@ app.post(
         );
 
       if (shippingCost && shippingCost > 0) {
+        console.log("ROTA: POST /api/checkout - Adicionando custo de envio...");
         line_items.push({
           price_data: {
             currency: "brl",
@@ -350,10 +337,13 @@ app.post(
         sessionParams.customer_email = customerEmail;
       }
 
+      console.log("ROTA: POST /api/checkout - Criando sessão Stripe...");
       const session = await stripe.checkout.sessions.create(sessionParams);
-      res.json({ sessionId: session.id });
+      console.log("ROTA: POST /api/checkout - Sessão criada:", session.id);
+      res.json({ sessionId: session.id, url: session.url });
+
     } catch (err: unknown) {
-      console.error("❌ Stripe checkout error:", err);
+      console.error("❌ ROTA: POST /api/checkout - Erro Stripe:", err);
       if (err instanceof Stripe.errors.StripeError) {
         const stripeError = err as Stripe.errors.StripeError;
         res.status(stripeError.statusCode || 500).json({
@@ -362,16 +352,19 @@ app.post(
           code: stripeError.code,
         });
       } else {
-        res
-          .status(500)
-          .json({
-            error:
-              (err as Error).message ||
-              "Erro desconhecido ao processar o checkout.",
-          });
+        res.status(500).json({
+          error:
+            (err as Error).message ||
+            "Erro desconhecido ao processar o checkout.",
+        });
       }
     }
   }
 );
+
+app.use((_req: Request, res: Response) => {
+  console.log("ROTA: Nenhuma rota encontrada - Retornando 404");
+  res.status(404).json({ message: "Rota não encontrada neste servidor" });
+});
 
 export default app;
