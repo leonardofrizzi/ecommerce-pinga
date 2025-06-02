@@ -6,7 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 
 const stripePromise = loadStripe(
-  "pk_live_51R6aKTGdQrTu9hK3LggAl4OGzSvzEhtFneb4PC3uJNCBCeD9TxNUBTWxlnxeHAwOGXCO9wyxcYT7jatAKIEi7aI"
+  "pk_live_51R6aKTGdQrTu9hK3LggAl4OGzSvzEhtFneb4PC3uJNCBCeD9TxNUBTWxlnxeHAwOGXCO9wyxcYT7jatAKIEi7aIV0021K0WMml"
 );
 
 interface CustomerForm {
