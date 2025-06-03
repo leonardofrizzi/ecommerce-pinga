@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import { API_BASE_URL } from "@/utils/api";
 
 interface Product {
   _id: string;
@@ -17,7 +18,7 @@ export default function ProductsSection() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://api.pinga.etc.br/api/produtos")
+    fetch(`${API_BASE_URL}/api/produtos`)
       .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();
