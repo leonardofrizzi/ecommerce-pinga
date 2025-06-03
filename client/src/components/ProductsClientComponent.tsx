@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import { API_BASE_URL } from "@/utils/api";
 
 interface FetchedProduct {
   _id: string;
@@ -25,7 +26,7 @@ export default function ProductsClientComponent() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://api.pinga.etc.br/api/produtos")
+    fetch(`${API_BASE_URL}/api/produtos`)
       .then((res) => {
         if (!res.ok) throw new Error(`Status ${res.status}`);
         return res.json();

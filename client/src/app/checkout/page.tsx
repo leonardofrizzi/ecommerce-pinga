@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
+import { API_BASE_URL } from "@/utils/api";
 
 const stripePromise = loadStripe(
   "pk_live_51R6aKTGdQrTu9hK3LggAl4OGzSvzEhtFneb4PC3uJNCBCeD9TxNUBTWxlnxeHAwOGXCO9wyxcYT7jatAKIEi7aIV0021K0WMml"
@@ -85,7 +86,7 @@ export default function CheckoutPage() {
         successUrl: `${origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${origin}/`,
       };
-      const res = await fetch("https://api.pinga.etc.br/api/checkout", {
+      const res = await fetch(`${API_BASE_URL}/api/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -6,6 +6,7 @@ import { FiShoppingCart } from "react-icons/fi"; // Certifique-se que react-icon
 import { useCart } from "@/contexts/CartContext";
 import ProductCard from "@/components/ProductCard";
 import { slugify } from "@/utils/slugify";
+import { API_BASE_URL } from "@/utils/api";
 
 interface Product {
   _id: string;
@@ -47,7 +48,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
   ] = useState<ShippingOption | null>(null);
 
   useEffect(() => {
-    fetch("https://api.pinga.etc.br/api/produtos")
+    fetch(`${API_BASE_URL}/api/produtos`)
       .then((res) => {
         if (!res.ok) throw new Error(`Falha ao buscar produtos: ${res.status}`);
         return res.json();
@@ -135,7 +136,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      const url = `https://api.pinga.etc.br?cepDestino=${zip}&peso=${pesoTotalCalculado}&valor=${valorTotalDeclarado}`;
+      const url = `${API_BASE_URL}/api/frete?cepDestino=${zip}&peso=${pesoTotalCalculado}&valor=${valorTotalDeclarado}`;
       console.log("FRONTEND: URL da requisição de frete:", url);
 
       const res = await fetch(url);
