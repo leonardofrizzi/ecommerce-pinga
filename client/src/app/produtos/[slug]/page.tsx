@@ -135,7 +135,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      const url = `/api/frete?cep=${zip}&peso=${pesoTotalCalculado}&valor=${valorTotalDeclarado}`;
+      const url = `https://api.pinga.etc.br?cepDestino=${zip}&peso=${pesoTotalCalculado}&valor=${valorTotalDeclarado}`;
       console.log("FRONTEND: URL da requisição de frete:", url);
 
       const res = await fetch(url);

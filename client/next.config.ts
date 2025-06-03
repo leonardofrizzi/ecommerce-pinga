@@ -1,5 +1,9 @@
+import path from "path";
+import { NextConfig } from "next";
+import { Configuration } from "webpack";
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -14,6 +18,13 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  webpack(config: Configuration) {
+    config.cache = {
+      type: "filesystem",
+      cacheDirectory: path.resolve("G:/npm-cache"),
+    } as Configuration['cache'];
+    return config;
+  },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

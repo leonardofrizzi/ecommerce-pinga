@@ -180,7 +180,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "/ecommerce-pinga-backend/prod/1748302275295-2025-05-26T23:31:15.295Z/api.zip"
+                "S3Key": "/ecommerce-pinga-backend/prod/1748906108352-2025-06-02T23:15:08.352Z/api.zip"
               },
               "Handler": "src/lambda.handler",
               "Runtime": "nodejs18.x",
@@ -204,14 +204,14 @@
               "ApiLogGroup"
             ]
           },
-          "ApiLambdaVersion9aTDmSDaZFNvxmD6336GeDnJKFX9epACig7nHGJK4M": {
+          "ApiLambdaVersion9l8BfApCp3MECB1w9cZecnmgwEngDeOLszJHX2XEkA": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "+hX7Fv7ubLO6aaOEA1Z/pot3BC/4DYYpDewgB/cyS38="
+              "CodeSha256": "gN0dvKLcdUumvkGHQ2dfmsAMOPZz/LpUU6PpvXQq0UA="
             }
           },
           "ApiGatewayRestApi": {
@@ -332,7 +332,7 @@
               "ApiLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1748302272943": {
+          "ApiGatewayDeployment1748906086146": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -395,7 +395,7 @@
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersion9aTDmSDaZFNvxmD6336GeDnJKFX9epACig7nHGJK4M"
+              "Ref": "ApiLambdaVersion9l8BfApCp3MECB1w9cZecnmgwEngDeOLszJHX2XEkA"
             },
             "Export": {
               "Name": "sls-ecommerce-pinga-backend-prod-ApiLambdaFunctionQualifiedArn"
@@ -571,7 +571,7 @@
         "timeout": 30,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersion9aTDmSDaZFNvxmD6336GeDnJKFX9epACig7nHGJK4M"
+        "versionLogicalId": "ApiLambdaVersion9l8BfApCp3MECB1w9cZecnmgwEngDeOLszJHX2XEkA"
       }
     },
     "configValidationMode": "warn",
@@ -601,7 +601,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "/ecommerce-pinga-backend/prod/1748302275295-2025-05-26T23:31:15.295Z",
+    "artifactDirectoryName": "/ecommerce-pinga-backend/prod/1748906108352-2025-06-02T23:15:08.352Z",
     "artifact": ""
   }
 }

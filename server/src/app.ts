@@ -236,7 +236,7 @@ app.get("/api/frete", async (req: Request, res: Response): Promise<void> => {
       nIndicaCalculo: argsBaseCorreios.nIndicaCalculo,
   });
 
-  const urlCorreiosHttp = `http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${queryParams.toString()}`;
+  const urlCorreiosHttp = `http://cws.correios.com.br/calculador/CalcPrecoPrazo.aspx?${queryParams.toString()}`;
   console.log("ROTA: GET /api/frete - Chamando Correios:", urlCorreiosHttp);
 
   try {
