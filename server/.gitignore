@@ -1,0 +1,21 @@
+# Dependências
+node_modules/
+
+# Ambiente
+.env
+.env.*.local
+
+# Serverless build artifacts
+.serverless/
+
+# Build / logs
+dist/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Mac / editor
+.DS_Store
+.vscode/
+.idea/

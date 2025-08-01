@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 export default function SucessoClientComponent() {
   const params = useSearchParams();
   const sessionId = params.get("session_id");
-  const whatsappNumber = "5521997782021"; // Lembre-se de verificar se este número está correto
-  const message = `Olá, comprei pelo site e gostaria de acompanhar meu pedido. Código: ${sessionId || 'N/A'}`; // Adicionado N/A para segurança
+  const whatsappNumber = "5521997782021";
+  const message = `Olá, comprei pelo site e gostaria de acompanhar meu pedido. Código: ${sessionId || 'N/A'}`; 
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   return (

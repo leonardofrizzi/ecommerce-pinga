@@ -1,4 +1,3 @@
-// client/src/contexts/CartContext.tsx
 "use client";
 
 import {
@@ -30,8 +29,6 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
-
-  // drawer
   drawerOpen: boolean;
   toggleDrawer: () => void;
 }

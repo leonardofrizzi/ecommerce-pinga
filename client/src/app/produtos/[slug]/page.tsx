@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { FiShoppingCart } from "react-icons/fi"; // Certifique-se que react-icons está no package.json
+import { FiShoppingCart } from "react-icons/fi"; 
 import { useCart } from "@/contexts/CartContext";
 import ProductCard from "@/components/ProductCard";
 import { slugify } from "@/utils/slugify";
@@ -28,11 +28,8 @@ interface ShippingOption {
   deadline: number;
 }
 
-// Removida a interface ProductPageProps
-
-// MUDANÇA AQUI: Tipagem inline para os props
 export default function ProductPage({ params }: { params: { slug: string } }) {
-  const { slug } = params; // slug é extraído de params
+  const { slug } = params; 
   const { addToCart } = useCart();
 
   const [allProducts, setAllProducts] = useState<Product[]>([]);

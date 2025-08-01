@@ -27,7 +27,6 @@ const ProductSchema = new Schema<IProduct>(
     description: { type: String, default: "" },
     category: { type: String, default: "" },
     stock: { type: Number, default: 0 },
-    // campos adicionais:
     ean: { type: String, default: "" },
     vendaUnidade: { type: String, default: "" },
     volume: { type: String, default: "" },
